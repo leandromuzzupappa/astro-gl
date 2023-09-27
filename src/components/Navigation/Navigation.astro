@@ -1,0 +1,242 @@
+---
+const pages = [
+  {
+    title: "WebastroGL",
+    slug: "/",
+  },
+  {
+    title: "Simple point",
+    slug: "/lessons/02-drawing-a-point",
+  },
+];
+---
+
+<button class="menu" data-active="false">
+  <span></span>
+  <span></span>
+  <span></span>
+  <span></span>
+</button>
+<nav>
+  <ul>
+    {
+      pages.map(({ title, slug }) => (
+        <li>
+          <a href={slug}>{title}</a>
+        </li>
+      ))
+    }
+  </ul>
+</nav>
+
+<style>
+  :root {
+    --navigation-padding: 2rem;
+    --btn-width: 60px;
+    --btn-span-width: 1rem;
+    --btn-span-height: 2px;
+    --btn-span-space-h: 15%;
+    --btn-span-space-v: 6%;
+    --btn-span-color: var(--primary-light);
+  }
+
+  nav {
+    border-right: 1px solid var(--primary-light);
+    display: none;
+    height: 100%;
+    left: 0;
+    padding: var(--navigation-padding);
+    padding-top: calc(var(--navigation-padding) * 3);
+    position: absolute;
+    top: 0;
+    width: 10%;
+  }
+
+  ul {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  li {
+    padding: 0.5rem;
+    display: none;
+  }
+
+  a {
+    text-decoration: none;
+    color: var(--primary-light);
+  }
+
+  a:hover {
+    color: var(--primary-color);
+  }
+
+  .menu {
+    position: absolute;
+    top: var(--navigation-padding);
+    left: var(--navigation-padding);
+    width: var(--btn-width);
+    aspect-ratio: 1/1;
+    border: 0;
+    background: none;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+    z-index: 1;
+  }
+
+  .menu span {
+    position: absolute;
+    display: block;
+    width: var(--btn-span-width);
+    height: var(--btn-span-height);
+    background: var(--btn-span-color);
+    top: 50%;
+    translate: 0% -50%;
+    transform-origin: center;
+    transition: all 0.3s ease-in-out;
+  }
+
+  /* left spans */
+  .menu span:nth-child(1),
+  .menu span:nth-child(2) {
+    left: var(--btn-span-space-h);
+  }
+
+  /* right spans */
+  .menu span:nth-child(3),
+  .menu span:nth-child(4) {
+    right: var(--btn-span-space-h);
+  }
+
+  /* vertical position span */
+  .menu span:nth-child(1) {
+    top: calc(50% - 6%);
+  }
+
+  .menu span:nth-child(4) {
+    top: calc(50% + 6%);
+  }
+
+  /* Hover */
+  .menu:hover span {
+    background: var(--primary-color);
+  }
+
+  .menu[data-active="true"] span,
+  .menu:hover span {
+    scale: 0.8 1;
+  }
+
+  .menu[data-active="true"] span:nth-child(1),
+  .menu:hover span:nth-child(1) {
+    left: 50%;
+    translate: -50% -50%;
+  }
+
+  .menu[data-active="true"] span:nth-child(2),
+  .menu:hover span:nth-child(2) {
+    left: calc(var(--btn-span-space-h) - 5%);
+  }
+
+  .menu[data-active="true"] span:nth-child(4),
+  .menu:hover span:nth-child(4) {
+    right: 50%;
+    translate: 50% -50%;
+  }
+
+  .menu[data-active="true"] span:nth-child(3),
+  .menu:hover span:nth-child(3) {
+    right: calc(var(--btn-span-space-h) - 5%);
+  }
+
+  /* Active */
+  .menu[data-active="true"]:not(:hover) span:nth-child(1),
+  .menu[data-active="true"]:not(:hover) span:nth-child(4) {
+    scale: 1.5 1;
+  }
+
+  .menu[data-active="true"]:not(:hover) span:nth-child(2) {
+    transform-origin: left;
+    scale: 0.5 1;
+  }
+
+  .menu[data-active="true"]:not(:hover) span:nth-child(3) {
+    transform-origin: right;
+    scale: 0.5 1;
+  }
+</style>
+
+<script>
+  import { gsap } from "gsap";
+
+  const button = document.querySelector(".menu");
+  const nav = document.querySelector("nav");
+  const listItems = nav.querySelectorAll("li");
+
+  const tl = gsap.timeline({ paused: true });
+
+  /* toggle data-active attribute from menu */
+  button.addEventListener("click", () => {
+    const isActive = button.getAttribute("data-active") === "true";
+    button.setAttribute("data-active", String(!isActive));
+
+    if (!isActive) onOpen();
+    else onClose();
+  });
+
+  function onOpen() {
+    tl.fromTo(
+      nav,
+      {
+        autoAlpha: 0,
+        display: "none",
+        x: -100,
+      },
+      {
+        autoAlpha: 1,
+        display: "block",
+        x: 0,
+        duration: 0.5,
+      }
+    );
+
+    listItems.forEach((item, index) => {
+      tl.fromTo(
+        item,
+        {
+          autoAlpha: 0,
+          display: "none",
+          x: -100,
+        },
+        {
+          autoAlpha: 1,
+          display: "block",
+          x: 0,
+          duration: 0.5,
+          delay: index * 0.1,
+        },
+        "-=0.3"
+      );
+    });
+
+    tl.play();
+  }
+  function onClose(callback?: () => void) {
+    tl.reverse();
+    tl.eventCallback("onReverseComplete", () => {
+      tl.clear();
+      callback();
+    });
+  }
+
+  listItems.forEach((item) => {
+    item.addEventListener("click", (e) => {
+      e.preventDefault();
+      button.setAttribute("data-active", "false");
+      onClose(() => {
+        window.location.href = item.querySelector("a").getAttribute("href");
+      });
+    });
+  });
+</script>
