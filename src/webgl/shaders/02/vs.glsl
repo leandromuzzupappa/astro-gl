@@ -1,0 +1,10 @@
+attribute vec4 position;
+
+void main(){
+  
+  vec4 pos=position;
+  
+  gl_Position=pos;
+  gl_PointSize=50.;
+  
+}

@@ -1,0 +1,89 @@
+---
+import Layout from "@layouts/Layout.astro";
+---
+
+<Layout title="Drawing a point" showTitle>
+  <main>
+    <canvas class="pepitos"></canvas>
+  </main>
+</Layout>
+
+<style></style>
+
+<script>
+  import { fragmentShaderData, vertexShaderData } from "@shaders/02";
+  import { createShader, createProgram } from "@webgl/utils";
+
+  const canvasSize = 512;
+
+  const canvas = document.querySelector<HTMLCanvasElement>(".pepitos")!;
+  canvas.width = canvasSize * devicePixelRatio;
+  canvas.height = canvasSize * devicePixelRatio;
+
+  canvas.style.width = `${canvasSize}px`;
+  canvas.style.height = `${canvasSize}px`;
+
+  const gl = canvas.getContext("webgl");
+  if (!gl) throw new Error("WebGL not supported");
+
+  // create and compile vs and fs on GPU
+  const vertexShader = createShader(gl, gl.VERTEX_SHADER, vertexShaderData);
+  const fragmentShader = createShader(
+    gl,
+    gl.FRAGMENT_SHADER,
+    fragmentShaderData
+  );
+
+  // create a WebGLProgram and link the vs and fs to it on the GPU
+  const drawProgram = createProgram(gl, vertexShader, fragmentShader);
+
+  // create an array holding the position of our point to be rendered
+  // prettier-ignore
+  const positions = new Float32Array([
+    0.0, 0.0, // x, y
+    0.5, 0.5, // x, y
+    0.2, 0.2  // x, y
+  ]);
+
+  // create a WebGLBuffer that will hold our position to be supplied to the GPU (vs)
+  const vertexBuffer = gl.createBuffer();
+
+  // Lookup "position" attribute variable location on our GPU
+  const positionAttribLocation = gl.getAttribLocation(drawProgram, "position");
+
+  tick();
+
+  function tick() {
+    if (!gl) return;
+    requestAnimationFrame(tick);
+
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+
+    // Bind WebGLBuffer to special WebGL bind point (gl.ARRAY_BUFFER)
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+
+    // Supply positions float 32 bit array to WebGLBuffer (vs)
+    gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+
+    // Enable this variable on the GPU
+    gl.enableVertexAttribArray(positionAttribLocation);
+
+    // Tell WebGL how to take data from the buffer and supply it to the attribute
+    gl.vertexAttribPointer(
+      positionAttribLocation, // Attribute location
+      2, // Number of elements per attribute --> const positions = new Float32Array([0, 0]); --> 2
+      gl.FLOAT, // Type of elements
+      false, // Normalized
+      0, // Size of an individual vertex
+      0 // Offset from the beginning of a single vertex to this attribute
+    );
+
+    // Tell WebGL to use our program (pair of shaders)
+    gl.useProgram(drawProgram);
+
+    // Draw
+    gl.drawArrays(gl.POINTS, 0, 3);
+  }
+</script>
