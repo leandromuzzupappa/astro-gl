@@ -2,7 +2,7 @@
 import Layout from "@layouts/Layout.astro";
 ---
 
-<Layout title="Drawing a point" showTitle>
+<Layout title="Mouse events" showTitle>
   <main>
     <canvas class="pepitos"></canvas>
   </main>
@@ -39,7 +39,7 @@ import Layout from "@layouts/Layout.astro";
 
   // create an array holding the position of our point to be rendered
   // prettier-ignore
-  const positions = new Float32Array([
+  let positions = new Float32Array([
     Math.random() * 2 - 1, // x
     Math.random() * 2 - 1, // y
   ]);
@@ -50,8 +50,11 @@ import Layout from "@layouts/Layout.astro";
   // Lookup "position" attribute variable location on our GPU
   const positionAttribLocation = gl.getAttribLocation(drawProgram, "position");
 
-  tick();
+  // Events
+  canvas.addEventListener('click', onMouseClick)
+  canvas.addEventListener('mousemove', onMouseMove)
 
+  tick();
   function tick() {
     if (!gl) return;
     requestAnimationFrame(tick);
@@ -83,6 +86,27 @@ import Layout from "@layouts/Layout.astro";
     gl.useProgram(drawProgram);
 
     // Draw
-    gl.drawArrays(gl.POINTS, 0, 1);
+    gl.drawArrays(gl.POINTS, 0, positions.length / 2);
   }
+
+  function onMouseClick(e:MouseEvent) {
+    positions = new Float32Array([]);
+  }
+
+  function onMouseMove(e: MouseEvent) {
+    const {pageX: globalX, pageY: globalY} = e
+
+    const canvasRect = canvas.getBoundingClientRect();
+    const localCanvasX = globalX - canvasRect.left;
+    const localCanvasY = globalY - canvasRect.top;
+
+    const x = (localCanvasX / canvasRect.width) * 2 - 1;
+    const y = (localCanvasY / canvasRect.height) * -2 + 1;
+
+    // positions[0] = x;
+    // positions[1] = y;
+
+    positions = new Float32Array([...positions, x, y]);
+  }
+
 </script>
