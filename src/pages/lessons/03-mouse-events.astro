@@ -11,7 +11,7 @@ import Layout from "@layouts/Layout.astro";
 <style></style>
 
 <script>
-  import { fragmentShaderData, vertexShaderData } from "@shaders/02";
+  import { fragmentShaderData, vertexShaderData } from "@shaders/03";
   import { createShader, createProgram } from "@webgl/utils";
 
   const canvasSize = 512;
@@ -44,11 +44,21 @@ import Layout from "@layouts/Layout.astro";
     Math.random() * 2 - 1, // y
   ]);
 
+  // create an array holding the colors of our point to be rendered
+  let colors = new Float32Array([
+    Math.random(), // r
+    Math.random(), // g
+    Math.random(), // b
+  ])
+
   // create a WebGLBuffer that will hold our position to be supplied to the GPU (vs)
   const vertexBuffer = gl.createBuffer();
+  const colorBuffer = gl.createBuffer();
 
   // Lookup "position" attribute variable location on our GPU
   const positionAttribLocation = gl.getAttribLocation(drawProgram, "position");
+  const colorAttribLocation = gl.getAttribLocation(drawProgram, "color")
+  
 
   // Events
   canvas.addEventListener('click', onMouseClick)
@@ -60,22 +70,35 @@ import Layout from "@layouts/Layout.astro";
     requestAnimationFrame(tick);
 
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.clearColor(0, 0, 0, 1);
+    gl.clearColor(0,0,0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Bind WebGLBuffer to special WebGL bind point (gl.ARRAY_BUFFER)
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 
     // Supply positions float 32 bit array to WebGLBuffer (vs)
     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
 
     // Enable this variable on the GPU
     gl.enableVertexAttribArray(positionAttribLocation);
+    gl.enableVertexAttribArray(colorAttribLocation);
+
 
     // Tell WebGL how to take data from the buffer and supply it to the attribute
     gl.vertexAttribPointer(
       positionAttribLocation, // Attribute location
       2, // Number of elements per attribute --> const positions = new Float32Array([0, 0]); --> 2
+      gl.FLOAT, // Type of elements
+      false, // Normalized
+      0, // Size of an individual vertex
+      0 // Offset from the beginning of a single vertex to this attribute
+    );
+
+    gl.vertexAttribPointer(
+      colorAttribLocation, // Attribute location
+      3, // Number of elements per attribute --> const colors = new Float32Array([0, 0]); --> 3
       gl.FLOAT, // Type of elements
       false, // Normalized
       0, // Size of an individual vertex
@@ -103,10 +126,14 @@ import Layout from "@layouts/Layout.astro";
     const x = (localCanvasX / canvasRect.width) * 2 - 1;
     const y = (localCanvasY / canvasRect.height) * -2 + 1;
 
-    // positions[0] = x;
-    // positions[1] = y;
+    const r = Math.random() * 2 - 0.5 ;
+    const g = Math.random() * 2 - 0.5 ;
+    const b = Math.random() * 2 - 0.5 ;
 
     positions = new Float32Array([...positions, x, y]);
+    colors = new Float32Array([...colors, r, g, b])
+    
+  
   }
 
 </script>
