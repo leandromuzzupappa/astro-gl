@@ -1,4 +1,6 @@
 ---
+import { ViewTransitions } from "astro:transitions";
+import Navigation from "@components/Navigation/Navigation.astro";
 interface Props {
   title: string;
   showTitle?: boolean;
@@ -16,6 +18,8 @@ const { title, showTitle } = Astro.props;
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+
+    <ViewTransitions />
   </head>
   <body>
     <header>
@@ -23,51 +27,55 @@ const { title, showTitle } = Astro.props;
     </header>
 
     <slot />
-  </body>
+
+    <footer>
+      <Navigation />
+    </footer>
+  </body><style is:global>
+    :root {
+      --primary-light: #dee4ff;
+      --primary-dark: #13151a;
+      --primary-color: #ff621e;
+    }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    html {
+      background: var(--primary-dark);
+    }
+
+    body {
+      border: 1.125rem solid var(--primary-light);
+      display: grid;
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        Roboto,
+        Oxygen,
+        Ubuntu,
+        Cantarell,
+        "Open Sans",
+        "Helvetica Neue",
+        sans-serif;
+      min-height: 100vh;
+      place-content: center;
+    }
+
+    h1 {
+      color: var(--primary-light);
+      margin-bottom: 1.125rem;
+    }
+
+    canvas {
+      width: 512px;
+      height: 512px;
+      background: var(--primary-light);
+    }
+  </style>
 </html>
-<style is:global>
-  :root {
-    --primary-light: #dee4ff;
-    --primary-dark: #13151a;
-  }
-  *,
-  *::before,
-  *::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-  }
-  html {
-    background: var(--primary-dark);
-  }
-
-  body {
-    border: 1.125rem solid var(--primary-light);
-    display: grid;
-    font-family:
-      system-ui,
-      -apple-system,
-      BlinkMacSystemFont,
-      "Segoe UI",
-      Roboto,
-      Oxygen,
-      Ubuntu,
-      Cantarell,
-      "Open Sans",
-      "Helvetica Neue",
-      sans-serif;
-    min-height: 100vh;
-    place-content: center;
-  }
-
-  h1 {
-    color: var(--primary-light);
-    margin-bottom: 1.125rem;
-  }
-
-  canvas {
-    width: 512px;
-    height: 512px;
-    background: var(--primary-light);
-  }
-</style>
