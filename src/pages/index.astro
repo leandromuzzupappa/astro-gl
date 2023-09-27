@@ -2,7 +2,7 @@
 import Layout from "../layouts/Layout.astro";
 ---
 
-<Layout title="AstroGL" showTitle>
+<Layout title="AstroGL Test" showTitle>
   <main>
     <canvas class="pepitos"></canvas>
   </main>
@@ -11,6 +11,46 @@ import Layout from "../layouts/Layout.astro";
 <style></style>
 
 <script>
-  const canvas = document.querySelector(".pepitos");
-  console.log(canvas);
+  const canvasSize = 512;
+
+  const canvas = document.querySelector<HTMLCanvasElement>(".pepitos")!;
+  canvas.width = canvasSize * devicePixelRatio;
+  canvas.height = canvasSize * devicePixelRatio;
+
+  canvas.style.width = `${canvasSize}px`;
+  canvas.style.height = `${canvasSize}px`;
+
+  const gl = canvas.getContext("webgl");
+
+  if (!gl) {
+    throw new Error("WebGL not supported");
+  }
+
+  tick();
+
+  function tick() {
+    if (!gl) return;
+    requestAnimationFrame(tick);
+
+    const time = performance.now() / 1000;
+
+    gl.enable(gl.SCISSOR_TEST); // Mask parts of the canvas
+
+    gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
+    gl.clearColor(0, 0, 0, 1);
+
+    for (let i = 0; i < 30; i++) {
+      gl.scissor(
+        i * 10 * devicePixelRatio,
+        i * Math.sin(time * 5) * devicePixelRatio + i * 10,
+        100 * devicePixelRatio,
+        100 * devicePixelRatio
+      );
+
+      gl.clearColor(Math.random(), Math.random(), Math.random(), 1);
+      gl.clear(gl.COLOR_BUFFER_BIT);
+    }
+
+    gl.clear(gl.COLOR_BUFFER_BIT);
+  }
 </script>
