@@ -4,6 +4,9 @@ import { defineConfig } from "astro/config";
 export default defineConfig({
   routes: [
     { path: "/", component: "pages/index.astro" },
-    { path: "/lessons/:slug", component: "pages/lessons/[slug].astro" },
+    {
+      path: "/explorations/:slug",
+      component: "pages/explorations/[slug].astro",
+    },
   ],
 });
