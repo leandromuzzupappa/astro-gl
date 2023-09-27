@@ -37,6 +37,7 @@ import Layout from "@layouts/Layout.astro";
   // create a WebGLProgram and link the vs and fs to it on the GPU
   const drawProgram = createProgram(gl, vertexShader, fragmentShader);
 
+  // position
   // create an array holding the position of our point to be rendered
   // prettier-ignore
   let positions = new Float32Array([
@@ -44,25 +45,27 @@ import Layout from "@layouts/Layout.astro";
     Math.random() * 2 - 1, // y
   ]);
 
+  // create a WebGLBuffer that will hold our position to be supplied to the GPU (vs)
+  const vertexBuffer = gl.createBuffer();
+
+  // Lookup "position" attribute variable location on our GPU
+  const positionAttribLocation = gl.getAttribLocation(drawProgram, "position");
+
+  // color
   // create an array holding the colors of our point to be rendered
   let colors = new Float32Array([
     Math.random(), // r
     Math.random(), // g
     Math.random(), // b
-  ])
+  ]);
 
-  // create a WebGLBuffer that will hold our position to be supplied to the GPU (vs)
-  const vertexBuffer = gl.createBuffer();
   const colorBuffer = gl.createBuffer();
 
-  // Lookup "position" attribute variable location on our GPU
-  const positionAttribLocation = gl.getAttribLocation(drawProgram, "position");
-  const colorAttribLocation = gl.getAttribLocation(drawProgram, "color")
-  
+  const colorAttribLocation = gl.getAttribLocation(drawProgram, "color");
 
   // Events
-  canvas.addEventListener('click', onMouseClick)
-  canvas.addEventListener('mousemove', onMouseMove)
+  canvas.addEventListener("click", onMouseClick);
+  canvas.addEventListener("mousemove", onMouseMove);
 
   tick();
   function tick() {
@@ -70,21 +73,17 @@ import Layout from "@layouts/Layout.astro";
     requestAnimationFrame(tick);
 
     gl.viewport(0, 0, gl.drawingBufferWidth, gl.drawingBufferHeight);
-    gl.clearColor(0,0,0, 1);
+    gl.clearColor(0, 0, 0, 1);
     gl.clear(gl.COLOR_BUFFER_BIT);
 
     // Bind WebGLBuffer to special WebGL bind point (gl.ARRAY_BUFFER)
     gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
-    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
 
     // Supply positions float 32 bit array to WebGLBuffer (vs)
     gl.bufferData(gl.ARRAY_BUFFER, positions, gl.STATIC_DRAW);
-    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
 
     // Enable this variable on the GPU
     gl.enableVertexAttribArray(positionAttribLocation);
-    gl.enableVertexAttribArray(colorAttribLocation);
-
 
     // Tell WebGL how to take data from the buffer and supply it to the attribute
     gl.vertexAttribPointer(
@@ -95,6 +94,10 @@ import Layout from "@layouts/Layout.astro";
       0, // Size of an individual vertex
       0 // Offset from the beginning of a single vertex to this attribute
     );
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, colorBuffer);
+    gl.bufferData(gl.ARRAY_BUFFER, colors, gl.DYNAMIC_DRAW);
+    gl.enableVertexAttribArray(colorAttribLocation);
 
     gl.vertexAttribPointer(
       colorAttribLocation, // Attribute location
@@ -112,12 +115,12 @@ import Layout from "@layouts/Layout.astro";
     gl.drawArrays(gl.POINTS, 0, positions.length / 2);
   }
 
-  function onMouseClick(e:MouseEvent) {
+  function onMouseClick(e: MouseEvent) {
     positions = new Float32Array([]);
   }
 
   function onMouseMove(e: MouseEvent) {
-    const {pageX: globalX, pageY: globalY} = e
+    const { pageX: globalX, pageY: globalY } = e;
 
     const canvasRect = canvas.getBoundingClientRect();
     const localCanvasX = globalX - canvasRect.left;
@@ -126,14 +129,11 @@ import Layout from "@layouts/Layout.astro";
     const x = (localCanvasX / canvasRect.width) * 2 - 1;
     const y = (localCanvasY / canvasRect.height) * -2 + 1;
 
-    const r = Math.random() * 2 - 0.5 ;
-    const g = Math.random() * 2 - 0.5 ;
-    const b = Math.random() * 2 - 0.5 ;
+    const r = Math.random() * 2 - 0.5;
+    const g = Math.random() * 2 - 0.5;
+    const b = Math.random() * 2 - 0.5;
 
     positions = new Float32Array([...positions, x, y]);
-    colors = new Float32Array([...colors, r, g, b])
-    
-  
+    colors = new Float32Array([...colors, r, g, b]);
   }
-
 </script>

@@ -10,7 +10,7 @@ void main(){
   vec4 pos=position;
   
   gl_Position=pos;
-  gl_PointSize=20.;
+  gl_PointSize=250.;
   
-  vColor = color;
+  vColor=color;
 }
